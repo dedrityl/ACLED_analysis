@@ -1,0 +1,133 @@
+---
+title: "This Arizona Oath Keepers' chapter has been busy recruiting since January 6"
+author: "Tyler Dedrick"
+date: '4/24/22'
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    df_print: paged
+    code_download: true
+    code_folding: hide
+    theme: cosmo
+---
+
+
+```{r setup, include=FALSE}
+
+# add other libraries you need in this chunk - all of them should be here.
+knitr::opts_chunk$set(echo = TRUE,
+                      warning= FALSE,
+                      message=FALSE)
+
+
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(reactable)
+library(ggplot2)
+library(plotly)
+library(gapminder)
+
+
+```
+
+```{r}
+acled_raw <- read.csv("1900-01-01-2022-04-09-United_States.csv")
+```
+
+
+```{r}
+acled_actor <- read.csv("1900-01-01-2022-04-09-United_States.csv") %>% 
+  mutate ( incident_date = dmy(event_date))
+
+acled_incident <-
+  acled_raw %>%
+  mutate ( incident_date = dmy(event_date))
+
+```
+
+```{r}
+acled_recruitment <-
+acled_incident %>% 
+  filter( str_detect( notes, "recruit"),
+          str_detect(interaction, "4")
+          ) %>% 
+  select(incident_date, year, event_type, sub_event_type, actor1, actor2, assoc_actor_2, source, interaction, admin1, admin2, location, notes) %>%
+  mutate(month = month(incident_date))
+```
+
+
+
+## Finding recruitment events in Arizona
+
+ACLED has tracked more than 30 recruitment events in Arizona since last April, the most in the United States. The Yavapai County Preparedness Team, a regional offshoot of the Oath Keepers, held the vast majority of recruitment events in Arizona.
+
+While most of YCPT's recruitment activity has occurred in Chino Valley, the group has also had events in Cottonwood and Surprise.
+
+```{r}
+acled_recruitment %>% 
+  filter( admin1 == "Arizona") %>%
+  group_by(actor1, location) %>% 
+  summarize(events = n()) %>% 
+  arrange(desc(events))
+```
+
+## What has the Yavapai County Preparedness Team been involved in?
+
+The group's only tracked activity was recruitment events.
+
+```{r}
+acled_incident %>% 
+  filter(actor1 == "Yavapai County Preparedness Team") %>% 
+  select(actor1, location, notes) %>% 
+  reactable(
+    searchable=TRUE,
+    columns = list(
+    )
+  )    
+```
+
+
+## Who is most actively recruiting?
+
+
+```{r}
+#acled_actor %>% 
+ # filter(str_detect(actor1, "Preparedness Team")) %>%
+  #group_by(actor1, event_type, year) %>% 
+  #summarize(n()) %>% 
+  #arrange(actor1)
+
+```
+
+The Yavapai County Preparedness Team has had 28 recruitment events since April 2021, the most tracked recruiting events of any organization during that time period.
+
+```{r}
+acled_incident %>% 
+  filter(incident_date > "2021-04-01", 
+          str_detect( notes, "recruit")) %>% 
+  group_by(actor1) %>% 
+  summarize(recruitment_events = n()) %>% 
+  arrange(desc(recruitment_events))
+
+```
+
+
+
+## Methodology
+
+The Armed Conflict Location & Event Data Project tracks political and violent incidents around the globe. Since 2020, ACLED has tracked political demonstrations and activity in the United States, pulling from the reporting of local news media or community groups.
+
+To analyze recruiting activity by various actors in the U.S., I defined "Recruitment events" as those which included the word "recruit" in the notes column.
+
+The dates were translated into R-friendly format using lubridate. 
+
+This export contains ACLED data in the United States, North America through April 9, 2022.
+
+Data pulled from: https://acleddata.com/data-export-tool/
+Data dictionary: https://acleddata.com/acleddatanew/wp-content/uploads/2021/11/ACLED_Codebook_v1_January-2021.pdf
+
+
+
+
