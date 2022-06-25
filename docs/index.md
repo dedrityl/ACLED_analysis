@@ -5,3 +5,5 @@ For this project, I downloaded data for the Armed Conflict and Event Location Da
 I identified tracked recruiting activities by an organization called the Yavapai County Preparedness Team.
 
 The repository contains my data analysis as well as a short "pitch" I wrote based on my data reporting and other research.
+
+Read it here: https://dedrityl.github.io/ACLED_analysis/dedrick_finalmemo.html
